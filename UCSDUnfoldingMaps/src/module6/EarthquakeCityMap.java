@@ -44,8 +44,9 @@ public class EarthquakeCityMap extends PApplet {
 	
 
 	//feed with magnitude 2.5+ Earthquakes
-	private String earthquakesURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.atom";
-	
+	//private String earthquakesURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.atom";
+	private String earthquakesURL = "test2.atom";
+
 	// The files containing city names and info and country names and info
 	private String cityFile = "city-data.json";
 	private String countryFile = "countries.geo.json";
@@ -123,6 +124,7 @@ public class EarthquakeCityMap extends PApplet {
 	    //           for their geometric properties
 	    map.addMarkers(quakeMarkers);
 	    map.addMarkers(cityMarkers);
+	    sortAndPrint(20);
 	    
 	    
 	}  // End setup
@@ -137,7 +139,17 @@ public class EarthquakeCityMap extends PApplet {
 	
 	
 	// TODO: Add the method:
-	//   private void sortAndPrint(int numToPrint)
+	private void sortAndPrint(int numToPrint) {
+		Object[] quakeArray = quakeMarkers.toArray();
+		Arrays.sort(quakeArray);
+		if (numToPrint > quakeArray.length) {
+			numToPrint = quakeArray.length;
+		}
+		for (int i = 0; i < numToPrint; i++) {
+			System.out.println(quakeArray[i]);
+		}
+
+	}
 	// and then call that method from setUp
 	
 	/** Event handler that gets called automatically when the 
