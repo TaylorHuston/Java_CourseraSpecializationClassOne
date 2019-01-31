@@ -29,6 +29,7 @@ public class LifeExpectancy extends PApplet {
 	HashMap<String, Float> lifeExpMap;
 	List<Feature> countries;
 	List<Marker> countryMarkers;
+	Marker lastClicked = null;
 
 	public void setup() {
 		size(800, 600, OPENGL);
@@ -44,14 +45,44 @@ public class LifeExpectancy extends PApplet {
 		countryMarkers = MapUtils.createSimpleMarkers(countries);
 		map.addMarkers(countryMarkers);
 		System.out.println(countryMarkers.get(0).getId());
-		
-		// Country markers are shaded according to life expectancy (only once)
+
+
 		shadeCountries();
+
 	}
 
 	public void draw() {
 		// Draw map tiles and country markers
 		map.draw();
+		addBox();
+	}
+
+	//Draws the Box and the Life Expectancy
+	private void addBox() {
+		fill (255, 250, 250);
+
+		int xbase = 15;
+		int ybase = 50;
+
+		rect(xbase, ybase, 115, 60);
+
+
+		if (lastClicked != null) {
+			String countryId = lastClicked.getId();
+			if (lifeExpMap.containsKey(countryId)) {
+				float lifeExp = lifeExpMap.get(countryId);
+
+				fill(0);
+				textAlign(LEFT, CENTER);
+				textSize(12);
+				text(countryId + ": " + lifeExp, xbase + 5, ybase + 25);
+			} else {
+				fill(0);
+				textAlign(LEFT, CENTER);
+				textSize(12);
+				text(countryId + ": N/A", xbase + 5, ybase + 25);
+			}
+		}
 	}
 
 	//Helper method to color each country based on life expectancy
@@ -61,7 +92,7 @@ public class LifeExpectancy extends PApplet {
 		for (Marker marker : countryMarkers) {
 			// Find data for country of the current marker
 			String countryId = marker.getId();
-			System.out.println(lifeExpMap.containsKey(countryId));
+			//System.out.println(lifeExpMap.containsKey(countryId));
 			if (lifeExpMap.containsKey(countryId)) {
 				float lifeExp = lifeExpMap.get(countryId);
 				// Encode value as brightness (values range: 40-90)
@@ -74,5 +105,35 @@ public class LifeExpectancy extends PApplet {
 		}
 	}
 
+	//On mouse click, cycles through all countries (markers).
+	//If the mouse click was in one, turn all other countries gray and
+	//display the life expectancy of the selected country in the top left box.
+	//Else clear the box and shade all the countries as normal.
+	@Override
+	public void mouseClicked() {
+		lastClicked = null;  //Reset the click
+		shadeCountries();  //Shade all countries
+
+		//Cycle through countries and see if one was clicked
+		for (Marker marker : countryMarkers) {
+			if (marker.isInside(map, mouseX, mouseY)) {
+				lastClicked = marker;  //This will let the box in the top left know which country to display
+				String countryId = marker.getId();
+
+				//Turn all countries grey
+				for (Marker marker2 : countryMarkers) {
+					marker2.setColor(color(150,150,150));
+				}
+
+				//If the selected country has a life expectancy, shade just it appropriately
+				if (lifeExpMap.containsKey(countryId)) {
+					float lifeExp = lifeExpMap.get(countryId);
+					// Encode value as brightness (values range: 40-90)
+					int colorLevel = (int) map(lifeExp, 40, 90, 10, 255);
+					marker.setColor(color(255-colorLevel, 100, colorLevel));
+				}
+			}
+		}
+	}
 
 }
